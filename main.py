@@ -30,17 +30,17 @@ def converting_csv_file():
 
 # Data reading and filtering function
 def filter_data():
-    selected_year = year_var.get()
-    selected_price = price_var.get()
     selected_brand = brand_var.get()
     selected_model = model_var.get()
+    selected_year = year_var.get()
+    selected_price = price_var.get()
 
     # Filter by selected year, price, brand, and model
-    filtered_cars = [car for car in data if
-                     car['year'] == selected_year and
-                     car['price'] == selected_price and
+    filtered_cars = [car for car in data if 
                      car['brand'] == selected_brand and
-                     car['model'] == selected_model]
+                     car['model'] == selected_model and
+                     car['year'] == selected_year and
+                     car['price'] == selected_price]
 
     # Cleaning UI
     for i in treeview.get_children():
@@ -98,28 +98,6 @@ root.title("Araç Filtreleme")
 input_frame = tk.Frame(root)
 input_frame.pack()
 
-# Year dropdown
-years = list(set(car['year'] for car in data))
-year_var = tk.StringVar(root)
-year_var.set(years[0])  # Select first year initially
-
-year_label = tk.Label(input_frame, text="Filtering Year:")
-year_label.pack(side=tk.LEFT)
-
-year_dropdown = tk.OptionMenu(input_frame, year_var, *years)
-year_dropdown.pack(side=tk.LEFT)
-
-# Price Filtering
-price = list(set(car['price'] for car in data))
-price_var = tk.StringVar(root)
-price_var.set(price[0])  # Select first price initially
-
-price_label = tk.Label(input_frame, text="Price:")
-price_label.pack(side=tk.LEFT)
-
-price_dropdown = tk.OptionMenu(input_frame, price_var, *price)
-price_dropdown.pack(side=tk.LEFT)
-
 # Brand filtering
 brand = list(set(car['brand'] for car in data))
 brand_var = tk.StringVar(root)
@@ -140,6 +118,29 @@ model_label.pack(side=tk.LEFT)
 
 model_dropdown = tk.OptionMenu(input_frame, model_var, *model)
 model_dropdown.pack(side=tk.LEFT)
+
+# Year dropdown
+years = list(set(car['year'] for car in data))
+year_var = tk.StringVar(root)
+year_var.set(years[0])  # Select first year initially
+
+year_label = tk.Label(input_frame, text="Filtering Year:")
+year_label.pack(side=tk.LEFT)
+
+year_dropdown = tk.OptionMenu(input_frame, year_var, *years)
+year_dropdown.pack(side=tk.LEFT)
+
+
+# Price Filtering
+price = list(set(car['price'] for car in data))
+price_var = tk.StringVar(root)
+price_var.set(price[0])  # Select first price initially
+
+price_label = tk.Label(input_frame, text="Price:")
+price_label.pack(side=tk.LEFT)
+
+price_dropdown = tk.OptionMenu(input_frame, price_var, *price)
+price_dropdown.pack(side=tk.LEFT)
 
 # Filtering button
 filter_button = tk.Button(input_frame, text="Filter", command=filter_data)
