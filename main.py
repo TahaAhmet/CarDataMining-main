@@ -132,11 +132,27 @@ model_label.pack(side=tk.LEFT)
 model_dropdown = tk.OptionMenu(input_frame, model_var, "All", *model)
 model_dropdown.pack(side=tk.LEFT)
 
+
+def update_models(*args):
+    selected_brand = brand_var.get()
+    models_for_selected_brand = list(set(car['model'] for car in data if car['brand'] == selected_brand))
+    models_for_selected_brand.insert(0, "All")  # Show all models
+    model_var.set("All")  # Initially selected "All"
+
+    # Update model dropdown menu options
+    menu = model_dropdown["menu"]
+    menu.delete(0, "end")
+    for model in models_for_selected_brand:
+        menu.add_command(label=model, command=tk._setit(model_var, model))
+
+# Update models when brand selection changes
+brand_var.trace_add("write", update_models)
+
 # Year dropdown
 years = list(set(car['year'] for car in data))
-years.insert(0, "All")  # Eklenen satır: Tüm yılları göster
+years.insert(0, "All")  # Added row: Show all years
 year_var = tk.StringVar(root)
-year_var.set("All")  # Değişen satır: Başlangıçta "All" seçili
+year_var.set("All")  # Changed line: "All" is initially selected
 
 year_label = tk.Label(input_frame, text="Filtering Year:")
 year_label.pack(side=tk.LEFT)
@@ -184,3 +200,4 @@ for col in columns:
 # Make the Treeview widget expand to fill available space
 treeview.pack(expand=True, fill=tk.BOTH)
 root.mainloop()
+
