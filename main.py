@@ -29,18 +29,32 @@ def converting_csv_file():
         csv_writer.writerows(data)
 
 # Data reading and filtering function
+# Data reading and filtering function
 def filter_data():
     selected_brand = brand_var.get()
     selected_model = model_var.get()
     selected_year = year_var.get()
-    selected_price = price_var.get()
 
-    # Filter by selected year, price, brand, and model
-    filtered_cars = [car for car in data if 
+    # Get entered minimum and maximum prices
+    min_price_str = min_price_entry.get().replace('₺', '').replace('.', '').replace(',', '')
+    max_price_str = max_price_entry.get().replace('₺', '').replace('.', '').replace(',', '')
+
+    try:
+        # Convert cleaned price strings to float
+        min_price = float(min_price_str) if min_price_str else float('-inf')
+        max_price = float(max_price_str) if max_price_str else float('inf')
+    except ValueError:
+        # Handle the case where the entered prices are not valid floats
+        treeview.delete(*treeview.get_children())  # Clear the Treeview
+        treeview.insert('', 'end', values=["Invalid price values"])
+        return
+
+    # Filter by selected year, brand, model, and price range
+    filtered_cars = [car for car in data if
                      car['brand'] == selected_brand and
                      car['model'] == selected_model and
                      car['year'] == selected_year and
-                     car['price'] == selected_price]
+                     min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
 
     # Cleaning UI
     for i in treeview.get_children():
@@ -94,7 +108,7 @@ for line in lines:
 
 # Creating a TKinter window
 root = tk.Tk()
-root.title("Araç Filtreleme")
+root.title("Second Hand Car App")
 input_frame = tk.Frame(root)
 input_frame.pack()
 
@@ -130,21 +144,35 @@ year_label.pack(side=tk.LEFT)
 year_dropdown = tk.OptionMenu(input_frame, year_var, *years)
 year_dropdown.pack(side=tk.LEFT)
 
-
 # Price Filtering
-price = list(set(car['price'] for car in data))
-price_var = tk.StringVar(root)
-price_var.set(price[0])  # Select first price initially
-
-price_label = tk.Label(input_frame, text="Price:")
+price_label = tk.Label(input_frame, text="Price Range:")
 price_label.pack(side=tk.LEFT)
 
-price_dropdown = tk.OptionMenu(input_frame, price_var, *price)
-price_dropdown.pack(side=tk.LEFT)
+min_price_label = tk.Label(input_frame, text="Min:")
+min_price_label.pack(side=tk.LEFT)
+
+min_price_entry = tk.Entry(input_frame)
+min_price_entry.pack(side=tk.LEFT)
+
+max_price_label = tk.Label(input_frame, text="Max:")
+max_price_label.pack(side=tk.LEFT)
+
+max_price_entry = tk.Entry(input_frame)
+max_price_entry.pack(side=tk.LEFT)
 
 # Filtering button
 filter_button = tk.Button(input_frame, text="Filter", command=filter_data)
 filter_button.pack(side=tk.LEFT)
+
+# Set the initial size of the window and make it nearly full-screen
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+initial_width = int(screen_width * 0.8)
+initial_height = int(screen_height * 0.8)
+initial_position_x = int((screen_width - initial_width) / 2)
+initial_position_y = int((screen_height - initial_height) / 2)
+
+root.geometry(f"{initial_width}x{initial_height}+{initial_position_x}+{initial_position_y}")
 
 # Creating a data display widget (we will use Treeview)
 treeview = ttk.Treeview(root, columns=columns, show='headings')
@@ -153,6 +181,6 @@ treeview = ttk.Treeview(root, columns=columns, show='headings')
 for col in columns:
     treeview.heading(col, text=col)
 
-treeview.pack()
-
+# Make the Treeview widget expand to fill available space
+treeview.pack(expand=True, fill=tk.BOTH)
 root.mainloop()
