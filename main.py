@@ -28,8 +28,6 @@ def converting_csv_file():
         # Write the data to the CSV file
         csv_writer.writerows(data)
 
-# Data reading and filtering function
-# Data reading and filtering function
 def filter_data():
     selected_brand = brand_var.get()
     selected_model = model_var.get()
@@ -49,12 +47,18 @@ def filter_data():
         treeview.insert('', 'end', values=["Invalid price values"])
         return
 
-    # Filter by selected year, brand, model, and price range
-    filtered_cars = [car for car in data if
-                     car['brand'] == selected_brand and
-                     car['model'] == selected_model and
-                     car['year'] == selected_year and
-                     min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
+    # Filter by selected brand, model, and price range
+    if selected_year == "All":
+        filtered_cars = [car for car in data if
+                         car['brand'] == selected_brand and
+                         car['model'] == selected_model and
+                         min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
+    else:
+        filtered_cars = [car for car in data if
+                         car['brand'] == selected_brand and
+                         car['model'] == selected_model and
+                         car['year'] == selected_year and
+                         min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
 
     # Cleaning UI
     for i in treeview.get_children():
@@ -135,8 +139,9 @@ model_dropdown.pack(side=tk.LEFT)
 
 # Year dropdown
 years = list(set(car['year'] for car in data))
+years.insert(0, "All")  # Eklenen satır: Tüm yılları göster
 year_var = tk.StringVar(root)
-year_var.set(years[0])  # Select first year initially
+year_var.set("All")  # Değişen satır: Başlangıçta "All" seçili
 
 year_label = tk.Label(input_frame, text="Filtering Year:")
 year_label.pack(side=tk.LEFT)
@@ -180,7 +185,7 @@ treeview = ttk.Treeview(root, columns=columns, show='headings')
 # Adjust column headers
 for col in columns:
     treeview.heading(col, text=col)
-
+    
 # Make the Treeview widget expand to fill available space
 treeview.pack(expand=True, fill=tk.BOTH)
 root.mainloop()
