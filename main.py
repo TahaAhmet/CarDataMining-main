@@ -30,8 +30,6 @@ def converting_csv_file():
 
 def filter_data():
     selected_brand = brand_var.get()
-    selected_model = model_var.get()
-    selected_year = year_var.get()
 
     # Get entered minimum and maximum prices
     min_price_str = min_price_entry.get().replace('₺', '').replace('.', '').replace(',', '')
@@ -47,17 +45,15 @@ def filter_data():
         treeview.insert('', 'end', values=["Invalid price values"])
         return
 
-    # Filter by selected brand, model, and price range
-    if selected_year == "All":
+    # Filter by selected brand and price range
+    if model_var.get() == "All":
         filtered_cars = [car for car in data if
                          car['brand'] == selected_brand and
-                         car['model'] == selected_model and
                          min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
     else:
         filtered_cars = [car for car in data if
                          car['brand'] == selected_brand and
-                         car['model'] == selected_model and
-                         car['year'] == selected_year and
+                         car['model'] == model_var.get() and
                          min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
 
     # Cleaning UI
@@ -72,7 +68,6 @@ def filter_data():
     else:
         # If no matching data, show a message
         treeview.insert('', 'end', values=["No matching data found"])
-
 
 # Reading data from text file and neatly creating dictionary
 with open('output.csv', 'r', encoding='utf-8') as file:
@@ -129,12 +124,12 @@ brand_dropdown.pack(side=tk.LEFT)
 # Model filtering
 model = list(set(car['model'] for car in data))
 model_var = tk.StringVar(root)
-model_var.set(model[0])  # Select first model initially
+model_var.set("All")  # Select "All" model initially
 
 model_label = tk.Label(input_frame, text="Model:")
 model_label.pack(side=tk.LEFT)
 
-model_dropdown = tk.OptionMenu(input_frame, model_var, *model)
+model_dropdown = tk.OptionMenu(input_frame, model_var, "All", *model)
 model_dropdown.pack(side=tk.LEFT)
 
 # Year dropdown
