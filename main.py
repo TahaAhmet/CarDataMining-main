@@ -72,7 +72,7 @@ def filter_data():
 # Reading data from text file and neatly creating dictionary
 with open('output.csv', 'r', encoding='utf-8') as file:
     lines = file.readlines()
-
+    
 data = []
 for line in lines:
     parts = line.strip().split(';')
@@ -110,6 +110,38 @@ root = tk.Tk()
 root.title("Second Hand Car App")
 input_frame = tk.Frame(root)
 input_frame.pack()
+
+def search_data():
+    search_term = search_entry.get().strip().lower()
+
+    if not search_term:
+        return  # If the search term is empty, do not take action
+
+    # Clear filtered data
+    for i in treeview.get_children():
+        treeview.delete(i)
+
+    # Search by brand or model
+    filtered_cars = [car for car in data if
+                     search_term in car['brand'].lower() or
+                     search_term in car['model'].lower() or
+                     (search_term in f"{car['brand'].lower()} {car['model'].lower()}")]
+
+    # Show filtered data
+    if filtered_cars:
+        for car in filtered_cars:
+            values = [car.get(col.replace(' ', '_').lower(), '') for col in columns]
+            treeview.insert('', 'end', values=values)
+    else:
+        treeview.insert('', 'end', values=["No matching data found"])
+        
+# Search entry
+search_entry = tk.Entry(input_frame)
+search_entry.pack(side=tk.LEFT)
+
+# Search button 
+search_button = tk.Button(input_frame, text="Search", command=search_data)
+search_button.pack(side=tk.LEFT, padx=(5, 200))
 
 # Brand filtering
 brand = list(set(car['brand'] for car in data))
