@@ -30,6 +30,7 @@ def converting_csv_file():
 
 def filter_data():
     selected_brand = brand_var.get()
+    selected_year = year_var.get()
 
     # Get entered minimum and maximum prices
     min_price_str = min_price_entry.get().replace('₺', '').replace('.', '').replace(',', '')
@@ -45,15 +46,29 @@ def filter_data():
         treeview.insert('', 'end', values=["Invalid price values"])
         return
 
-    # Filter by selected brand and price range
-    if model_var.get() == "All":
+    # Convert selected year to integer
+    try:
+        selected_year = int(selected_year) if selected_year != "All" else None
+    except ValueError:
+        treeview.delete(*treeview.get_children())  # Clear the Treeview
+        treeview.insert('', 'end', values=["Invalid year value"])
+        return
+
+    # Filter by selected brand, year, and price range
+    if selected_brand == "All":
+        filtered_cars = [car for car in data if
+                         (selected_year is None or int(car['year']) == selected_year) and
+                         min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
+    elif model_var.get() == "All":
         filtered_cars = [car for car in data if
                          car['brand'] == selected_brand and
+                         (selected_year is None or int(car['year']) == selected_year) and
                          min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
     else:
         filtered_cars = [car for car in data if
                          car['brand'] == selected_brand and
                          car['model'] == model_var.get() and
+                         (selected_year is None or int(car['year']) == selected_year) and
                          min_price <= float(car['price'].replace('₺', '').replace('.', '').replace(',', '')) <= max_price]
 
     # Cleaning UI
@@ -72,10 +87,13 @@ def filter_data():
 # Reading data from text file and neatly creating dictionary
 with open('output.csv', 'r', encoding='utf-8') as file:
     lines = file.readlines()
-    
+
 data = []
 for line in lines:
     parts = line.strip().split(';')
+
+    if(len(parts) > 23):
+        print(parts)
 
     car = {
         'model': parts[0],
@@ -104,6 +122,7 @@ for line in lines:
     }
 
     data.append(car)
+print(data[24])
 
 # Creating a TKinter window
 root = tk.Tk()
@@ -134,19 +153,19 @@ def search_data():
             treeview.insert('', 'end', values=values)
     else:
         treeview.insert('', 'end', values=["No matching data found"])
-        
+
 # Search entry
 search_entry = tk.Entry(input_frame)
 search_entry.pack(side=tk.LEFT)
 
-# Search button 
+# Search button
 search_button = tk.Button(input_frame, text="Search", command=search_data)
 search_button.pack(side=tk.LEFT, padx=(5, 200))
 
 # Brand filtering
-brand = list(set(car['brand'] for car in data))
+brand = ['All'] + list(set(car['brand'] for car in data))
 brand_var = tk.StringVar(root)
-brand_var.set(brand[0])  # Select first brand initially
+brand_var.set(brand[0])  # Select "All" brand initially
 brand_label = tk.Label(input_frame, text="Brand:")
 brand_label.pack(side=tk.LEFT)
 
@@ -163,7 +182,6 @@ model_label.pack(side=tk.LEFT)
 
 model_dropdown = tk.OptionMenu(input_frame, model_var, "All", *model)
 model_dropdown.pack(side=tk.LEFT)
-
 
 def update_models(*args):
     selected_brand = brand_var.get()
@@ -225,11 +243,15 @@ root.geometry(f"{initial_width}x{initial_height}+{initial_position_x}+{initial_p
 # Creating a data display widget (we will use Treeview)
 treeview = ttk.Treeview(root, columns=columns, show='headings')
 
+# Set column widths for each column
+column_widths = [60, 60, 100, 60, 60, 60, 100, 100, 80, 100, 80, 60, 60, 80, 80, 80, 100, 80, 80, 80, 60, 100, 60, 60]
+for col, width in zip(columns, column_widths):
+    treeview.column(col, width=width, anchor=tk.CENTER)  # Adjust the anchor as needed
+
 # Adjust column headers
 for col in columns:
     treeview.heading(col, text=col)
-    
+
 # Make the Treeview widget expand to fill available space
 treeview.pack(expand=True, fill=tk.BOTH)
 root.mainloop()
-
